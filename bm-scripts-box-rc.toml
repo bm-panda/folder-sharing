@@ -1,0 +1,76 @@
+[bmscriptsbox]
+
+[bmscriptsbox.info]
+id = "220949a5-1a53-4688-95b1-b70a13eebf8e"
+name = "局域网共享"
+desc = "一键将文件夹共享到局域网（SMB）。支持共享/取消共享/查看共享列表，可选只读或读写权限，免密 Guest 或密码访问，自动开启网络发现并放行防火墙，输出 \\电脑名\共享名 访问地址"
+version = "1.0.0"
+icon = "./imgs/logo.png"
+
+[bmscriptsbox.runtime]
+language = "powershell"
+language_version = ">=5.1"
+entry = "main.ps1"
+terminal = "always"
+
+[bmscriptsbox.triggers.context_menu]
+enabled = true
+targets = ["directory", "files"]
+
+[[bmscriptsbox.inputs]]
+name = "folder_paths"
+label = "文件夹"
+type = "list"
+pick = "folders"
+description = "要共享/取消共享的文件夹绝对路径"
+
+[[bmscriptsbox.params]]
+name = "action"
+label = "操作"
+type = "str"
+default = "share"
+choices = ["share", "unshare", "list"]
+choice_labels = { share = "共享", unshare = "取消共享", list = "查看当前共享" }
+description = "要执行的共享管理操作"
+
+[[bmscriptsbox.params]]
+name = "permission"
+label = "权限"
+type = "str"
+default = "read"
+choices = ["read", "full"]
+choice_labels = { read = "只读", full = "读写" }
+when = { field = "action", eq = "share" }
+description = "Everyone 的访问级别：read=只读，full=读写"
+
+[[bmscriptsbox.params]]
+name = "share_name"
+label = "共享名"
+type = "str"
+default = ""
+when = { field = "action", eq = "share" }
+description = "自定义共享名，留空则使用文件夹名"
+
+[[bmscriptsbox.params]]
+name = "guest_access"
+label = "免密访问"
+type = "bool"
+default = true
+when = { field = "action", eq = "share" }
+description = "true=自动启用Guest来宾账户，局域网设备免输密码直接访问；false=他机访问需输入本机账号密码"
+
+[bmscriptsbox.params_form]
+enabled = true
+
+[bmscriptsbox.node]
+enabled = true
+
+[[bmscriptsbox.outputs]]
+name = "share_paths"
+type = "list"
+description = "生成的 UNC 访问路径列表，如 \\\\电脑名\\共享名（list/unshare 操作时也有对应结果）"
+
+[[bmscriptsbox.outputs]]
+name = "summary"
+type = "str"
+description = "文字结果概要"
